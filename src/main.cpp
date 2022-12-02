@@ -85,6 +85,7 @@ void loop(void) {
   if(em > 5000){
     em = 0;
     Serial.println("Test");
+    
   }
 
  if (BUTTONstate == HIGH && prestate == 0) {
