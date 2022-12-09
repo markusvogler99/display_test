@@ -92,6 +92,7 @@ void loop(void) {
  
 
  
+ 
  Display.draw_display(reading_bend, reading_ax,rpm_value);
 
  
