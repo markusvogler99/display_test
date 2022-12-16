@@ -60,7 +60,8 @@ double reading_ax = 0;
 
 //Speed_Sensor
 
-double rpm_value = 0; 
+double rpm_value = 0;
+double load_cycles = 0; 
 
 
 
@@ -88,8 +89,8 @@ void loop(void) {
   time_test = 0; 
   }
 
- rpm_value = speed_sensor.get_rpm_value(SPEED_DIN_PIN);
- 
+ rpm_value = speed_sensor.get_load_cycles(SPEED_DIN_PIN);
+ //rpm_value = speed_sensor.get_rpm_value();
 
  
  
