@@ -8,7 +8,7 @@
 #include "Display_MCI.h"
 #include "elapsedMillis.h"
 #include "Tachometer.h"
-
+double test_variable = 0; 
 
 // For the Adafruit shield, these are the default.
 #define TFT_DC 9
@@ -33,72 +33,78 @@ const double offset_bend = 1.05;
 const double slope_ax = 0.0001; 
 const double offset_ax = 1;
 
-
-
-
 const int BUTTON = 5;
 
 int counter = 0; 
 int column = 0;
 
+int test = 0; 
 
 
-//File myFile;
- 
-//HX711 bending_force;
-//HX711 axial_force;
-
-Force_Sensor test_bending;
-Force_Sensor test_axial;
-
-Speed_Sensor speed_sensor;
-
-
-
-
- 
-//Force_Sensor
+//Force_Sensor bending
+Force_Sensor bending_sensor;
 double reading_bend = 0;
+
+//Force_Sensor axial
+Force_Sensor axial_sensor;
 double reading_ax = 0;
 
 //Speed_Sensor
-
+Speed_Sensor speed_sensor;
 double rpm_value = 0;
-double load_cycles = 0;
-
-
+int load_cycles = 0;
 
 
 Display_MCI Display;
 elapsedMillis time_test;
+elapsedMillis time_test_2;
 
- 
-void setup() {
-  Serial.begin(9600);
-  
-   pinMode(BUTTON, INPUT);
-
-   test_bending.init(BEND_DOUT_PIN,BEND_SCK_PIN,GAIN);
-   test_axial.init(AX_DOUT_PIN,AX_SCK_PIN,GAIN);
-
-    Display.init_display();
-
+void attached(){
+  load_cycles++;
 }
 
 
+void setup() {
+  Serial.begin(9600);
+  
+   pinMode(1, INPUT_PULLDOWN);
+
+   //bending_sensor.init(BEND_DOUT_PIN,BEND_SCK_PIN,GAIN);
+   //axial_sensor.init(AX_DOUT_PIN,AX_SCK_PIN,GAIN);
+   Display.init_display();
+   //speed_sensor.attach_interrupt(BUTTON);
+
+    attachInterrupt(digitalPinToInterrupt(1),attached,RISING);
+    
+}
 
 
 void loop(void) {
-  if (time_test>100){
-  reading_bend = test_bending.get_force_value(slope_bend, offset_bend);
-  reading_ax = test_axial.get_force_value(slope_ax, offset_ax);
-  time_test = 0; 
+  if (time_test>1000){
+  //reading_bend = bending_sensor.get_force_value(slope_bend, offset_bend);
+ // reading_ax = axial_sensor.get_force_value(slope_ax, offset_ax);
+  //Serial.printf("%d\n",load_cycles);
+  Serial.println(load_cycles);
+ // time_test = 0; 
   }
 
-  load_cycles = speed_sensor.get_load_cycles(); 
-  rpm_value = speed_sensor.get_rpm_value(SPEED_DIN_PIN);
+  //load_cycles = speed_sensor.get_load_cycles(); 
+  //rpm_value = speed_sensor.get_rpm_value();
+
+  
 
 
-  Display.draw_display(reading_bend, reading_ax,rpm_value,load_cycles);
+  // if (time_test_2>1000){
+    //test_variable = test_variable + 1000; 
+     // Display.draw_tacho(test_variable);
+     // time_test_2 = 0; 
+  //}
+
+ 
+test = load_cycles; 
+//detachInterrupt(37);
+
+ // Display.draw_display(reading_bend, reading_ax,rpm_value,test);
+  //Serial.println(load_cycles);
 }
 

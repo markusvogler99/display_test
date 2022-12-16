@@ -16,13 +16,15 @@ class Display_MCI
 {
 private: 
 
+
 public:
 
     //Speed_Sensor();
     //virtual ~Speed_Sensor();
 
     void init_display();
-    void draw_display(double reading_bend, double reading_ax,int rpm,int load_cycles);
+    void draw_display(double reading_bend, double reading_ax,int rpm,int test);
+    void draw_tacho(int rpm); 
 
 };
 
