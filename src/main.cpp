@@ -7,6 +7,7 @@
 #include "string.h"
 #include "Display_MCI.h"
 #include "elapsedMillis.h"
+#include "Tachometer.h"
 
 
 // For the Adafruit shield, these are the default.
@@ -53,6 +54,8 @@ Force_Sensor test_axial;
 Speed_Sensor speed_sensor;
 
 
+
+
  
 //Force_Sensor
 double reading_bend = 0;
@@ -61,14 +64,15 @@ double reading_ax = 0;
 //Speed_Sensor
 
 double rpm_value = 0;
-double load_cycles = 0; 
+double load_cycles = 0;
+
 
 
 
 Display_MCI Display;
 elapsedMillis time_test;
 
-
+ 
 void setup() {
   Serial.begin(9600);
   
@@ -82,6 +86,8 @@ void setup() {
 }
 
 
+
+
 void loop(void) {
   if (time_test>100){
   reading_bend = test_bending.get_force_value(slope_bend, offset_bend);
@@ -89,15 +95,10 @@ void loop(void) {
   time_test = 0; 
   }
 
- rpm_value = speed_sensor.get_load_cycles(SPEED_DIN_PIN);
- //rpm_value = speed_sensor.get_rpm_value();
+  load_cycles = speed_sensor.get_load_cycles(); 
+  rpm_value = speed_sensor.get_rpm_value(SPEED_DIN_PIN);
 
- 
- 
- Display.draw_display(reading_bend, reading_ax,rpm_value);
 
- 
-
-  
+  Display.draw_display(reading_bend, reading_ax,rpm_value,load_cycles);
 }
 

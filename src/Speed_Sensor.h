@@ -3,6 +3,8 @@
 
 #include "string.h"
 #include <Arduino.h>
+#include "Tachometer.h"
+
 
 
 class Speed_Sensor
@@ -13,9 +15,9 @@ public:
 
     
 
-    int get_load_cycles(byte DIN);
+    int get_rpm_value(byte DIN);
 
-    int get_rpm_value();
+    int get_load_cycles();
 
 };
 
