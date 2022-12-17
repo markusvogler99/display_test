@@ -40,6 +40,9 @@ int column = 0;
 
 int test = 0; 
 
+Tachometer tacho;
+
+int rpms = 0;
 
 //Force_Sensor bending
 Force_Sensor bending_sensor;
@@ -61,6 +64,7 @@ elapsedMillis time_test_2;
 
 void attached(){
   load_cycles++;
+  tacho.tick();
 }
 
 
@@ -68,9 +72,11 @@ void setup() {
   Serial.begin(9600);
   
    pinMode(1, INPUT_PULLDOWN);
+   pinMode(14, OUTPUT);
+   digitalWrite(14, LOW);
 
-   //bending_sensor.init(BEND_DOUT_PIN,BEND_SCK_PIN,GAIN);
-   //axial_sensor.init(AX_DOUT_PIN,AX_SCK_PIN,GAIN);
+   bending_sensor.init(BEND_DOUT_PIN,BEND_SCK_PIN,GAIN);
+   axial_sensor.init(AX_DOUT_PIN,AX_SCK_PIN,GAIN);
    Display.init_display();
    //speed_sensor.attach_interrupt(BUTTON);
 
@@ -81,30 +87,40 @@ void setup() {
 
 void loop(void) {
   if (time_test>1000){
-  //reading_bend = bending_sensor.get_force_value(slope_bend, offset_bend);
- // reading_ax = axial_sensor.get_force_value(slope_ax, offset_ax);
+  reading_bend = bending_sensor.get_force_value(slope_bend, offset_bend);
+  reading_ax = axial_sensor.get_force_value(slope_ax, offset_ax);
   //Serial.printf("%d\n",load_cycles);
   Serial.println(load_cycles);
- // time_test = 0; 
+  time_test = 0; 
   }
 
   //load_cycles = speed_sensor.get_load_cycles(); 
   //rpm_value = speed_sensor.get_rpm_value();
 
+  static uint32_t tmr;
+  if (millis() - tmr > 100) {
+    tmr = millis();
+  rpms = tacho.getRPM(); 
+  }
+
   
+  if (time_test_2>1000){
+    
+    test_variable = test_variable + 1000;
+    if (test_variable > 5000)
+    {
+     test_variable = 0;
+    } 
+      time_test_2 = 0; 
+ }
 
-
-  // if (time_test_2>1000){
-    //test_variable = test_variable + 1000; 
-     // Display.draw_tacho(test_variable);
-     // time_test_2 = 0; 
-  //}
+  Display.draw_tacho(test_variable);
 
  
 test = load_cycles; 
 //detachInterrupt(37);
 
- // Display.draw_display(reading_bend, reading_ax,rpm_value,test);
+ Display.draw_display(reading_bend, reading_ax,rpms,test);
   //Serial.println(load_cycles);
 }
 

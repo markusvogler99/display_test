@@ -4,7 +4,7 @@
  
 
 void Speed_Sensor::pin_ISR() {
-   //tacho.tick();
+   tacho.tick();
    count_value++;
 }
 

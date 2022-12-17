@@ -8,8 +8,10 @@ double temp_bend =0;
 double temp_ax = 0;
 int temp_rpm_value = 0; 
 int temp_loadcycles = 0;
+int temp_indicator = 0; 
 
 elapsedMillis time_display;
+elapsedMillis time_display_tacho;
 
 const int TEXT_SIZE_SMALL = 1;
   const int TEXT_SIZE_LARGE = 2;
@@ -19,9 +21,9 @@ const int TEXT_SIZE_SMALL = 1;
 
   const int PHOTODIODE_PIN_2 = 2;
 
- const uint16_t DIAL_CENTER_X = 320 / 2;
+ const uint16_t DIAL_CENTER_X = 180;
   const uint16_t DIAL_RADIUS = 100;
-  const uint16_t DIAL_CENTER_Y = 240 - 1;
+  const uint16_t DIAL_CENTER_Y = 235;
 
   const uint16_t INDICATOR_LENGTH = DIAL_RADIUS - 5;
 
@@ -76,6 +78,7 @@ float getCircleYWithLengthAndAngle(uint16_t radius, float angle) {
 void drawMajorTickLabels() {
 	tft.setTextSize(TEXT_SIZE_SMALL);
 	for (int label_index = 0; label_index < MAJOR_TICK_COUNT; label_index++) {
+    tft.setTextColor(ILI9341_ORANGE);
 		long rpm_tick_value = MAJOR_TICKS[label_index];
 		float tick_angle = (HALF_CIRCLE_DEGREES	* getPercentMaxRpm(rpm_tick_value)) + HALF_CIRCLE_DEGREES;
 		uint16_t dial_x = getCircleXWithLengthAndAngle(LABEL_RADIUS, tick_angle);
@@ -99,18 +102,25 @@ void drawIndicatorHand(long rpm_value) {
 	                     ILI9341_WHITE);
 }
 
+void clearIndicatorHand(long rpm_value) {
+    float indicator_angle = (HALF_CIRCLE_DEGREES * getPercentMaxRpm(rpm_value)) + HALF_CIRCLE_DEGREES;
+    uint16_t indicator_top_x = getCircleXWithLengthAndAngle(INDICATOR_LENGTH, indicator_angle);
+    uint16_t indicator_top_y = getCircleYWithLengthAndAngle(INDICATOR_LENGTH, indicator_angle);
+
+	tft.drawTriangle(DIAL_CENTER_X - INDICATOR_WIDTH / PHOTODIODE_PIN_2,
+	                     DIAL_CENTER_Y,DIAL_CENTER_X + INDICATOR_WIDTH / PHOTODIODE_PIN_2,
+	                     DIAL_CENTER_Y,
+	                     indicator_top_x, 
+	                     indicator_top_y, 
+	                     ILI9341_BLACK);
+}
+
 void Display_MCI::init_display()
 {
 tft.begin();
 tft.fillScreen(ILI9341_BLACK);
  tft.setRotation(3);
-}
-
-void Display_MCI::draw_display(double reading_bend, double reading_ax, int rpm_value, int test)
- 
-{
-
-  tft.setTextSize(1);
+  tft.setTextSize(2);
   tft.setTextColor(ILI9341_WHITE);
   tft.setCursor(5, 5);
   tft.print("Biegekraft: ");
@@ -123,9 +133,26 @@ void Display_MCI::draw_display(double reading_bend, double reading_ax, int rpm_v
   
   tft.setCursor(5, 65);
   tft.print("Lastzyklen: ");
-/*
+  tft.drawCircle(DIAL_CENTER_X, DIAL_CENTER_Y, DIAL_RADIUS, ILI9341_WHITE);
+  drawTickMarks();
+  drawMajorTickLabels();
+
+  tft.setTextColor(ILI9341_ORANGE);
+  tft.setTextSize(1);
+  tft.setCursor(110, 210);
+  tft.print(" x1000");
+  
+}
+
+void Display_MCI::draw_display(double reading_bend, double reading_ax, int rpm_value, int test)
+ 
+{
+
+ 
+
 if (time_display > 1000)
   {
+     tft.setTextSize(2);
    tft.setTextColor(ILI9341_BLACK);
    tft.setCursor(140, 5);
    tft.printf("%3.2f N",temp_bend);
@@ -157,15 +184,32 @@ if (time_display > 1000)
    temp_rpm_value = rpm_value;
    temp_loadcycles = test; 
    time_display = 0;
-  }*/
+  
  }
+
+}
  
      
 void Display_MCI::draw_tacho(int rpm)
 {
-  tft.drawCircle(DIAL_CENTER_X, DIAL_CENTER_Y, DIAL_RADIUS, ILI9341_WHITE);
-  drawTickMarks();
+  if (time_display_tacho > 1000)
+  {
+  clearIndicatorHand(temp_indicator);
+  tft.fillCircle(DIAL_CENTER_X, DIAL_CENTER_Y, 5, ILI9341_ORANGE);
+  tft.setTextColor(ILI9341_ORANGE);
+  tft.setTextSize(1);
+  tft.setCursor(110, 210);
+  tft.print(" x1000");
   drawMajorTickLabels();
   drawIndicatorHand(rpm);
+  tft.fillCircle(DIAL_CENTER_X, DIAL_CENTER_Y, 5, ILI9341_ORANGE);
+  tft.setTextColor(ILI9341_ORANGE);
+  tft.setTextSize(1);
+  tft.setCursor(110, 210);
+  tft.print(" x1000");
+  drawMajorTickLabels();
+  temp_indicator = rpm;
+  time_display_tacho = 0;  
+  }
 }
 
