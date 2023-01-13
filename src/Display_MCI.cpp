@@ -43,6 +43,17 @@ const int TEXT_SIZE_SMALL = 1;
   const int DIAL_LABEL_Y_OFFSET = 6;
   const int DIAL_LABEL_X_OFFSET = 4;
 
+   const int POS_BIEGEKRAFT_X= 5;
+   const int POS_BIEGEKRAFT_Y= 5;
+
+   const int POS_AXIALKRAFT_X= 5;
+   const int POS_AXIALKRAFT_Y= 25;
+
+   const int POS_LASTZYKLEN_X = 5;
+   const int POS_LASTZYKLEN_Y = 65;
+
+   const int POS_UPDATE_VALUES_X = 140;
+
 
   float getPercentMaxRpm(long value) {
 	float ret_value = (value * 1.0)/(DIAL_MAX_RPM * 1.0);
@@ -122,17 +133,18 @@ tft.fillScreen(ILI9341_BLACK);
  tft.setRotation(3);
   tft.setTextSize(2);
   tft.setTextColor(ILI9341_WHITE);
-  tft.setCursor(5, 5);
+  tft.setCursor(POS_BIEGEKRAFT_X,POS_BIEGEKRAFT_Y);
   tft.print("Biegekraft: ");
   
-  tft.setCursor(5, 25);
+  tft.setCursor(POS_AXIALKRAFT_X,POS_AXIALKRAFT_Y);
   tft.print("Axialkraft: ");
 
   tft.setCursor(5, 45);
   tft.print("Drehzahl: ");
   
-  tft.setCursor(5, 65);
+  tft.setCursor(POS_LASTZYKLEN_X, POS_LASTZYKLEN_Y);
   tft.print("Lastzyklen: ");
+  /*
   tft.drawCircle(DIAL_CENTER_X, DIAL_CENTER_Y, DIAL_RADIUS, ILI9341_WHITE);
   drawTickMarks();
   drawMajorTickLabels();
@@ -141,6 +153,18 @@ tft.fillScreen(ILI9341_BLACK);
   tft.setTextSize(1);
   tft.setCursor(110, 210);
   tft.print(" x1000");
+*/
+ 
+  tft.fillRect(225,200,200,200, ILI9341_GREEN);
+  tft.fillRect(0,200,95 ,100, ILI9341_RED);
+
+  tft.setTextColor(ILI9341_BLACK);
+  tft.setTextSize(2);
+  tft.setCursor(237, 214);
+  tft.print("WEITER");
+  tft.setCursor(20, 214);
+  tft.print("STOPP");
+  
   
 }
 
@@ -154,29 +178,29 @@ if (time_display > 1000)
   {
      tft.setTextSize(2);
    tft.setTextColor(ILI9341_BLACK);
-   tft.setCursor(140, 5);
+   tft.setCursor(POS_UPDATE_VALUES_X, POS_BIEGEKRAFT_Y);
    tft.printf("%3.2f N",temp_bend);
 
-   tft.setCursor(140, 25);
+   tft.setCursor(POS_UPDATE_VALUES_X, POS_AXIALKRAFT_Y);
    tft.printf("%3.2f N",temp_ax);
 
-   tft.setCursor(140, 45);
+   tft.setCursor(POS_UPDATE_VALUES_X, 45);
    tft.printf("%d rpm", temp_rpm_value);
 
-   tft.setCursor(140, 65);
+   tft.setCursor(POS_UPDATE_VALUES_X, POS_LASTZYKLEN_Y);
    tft.print(temp_loadcycles);
 
    tft.setTextColor(ILI9341_WHITE);
-   tft.setCursor(140, 5);
+   tft.setCursor(POS_UPDATE_VALUES_X, POS_BIEGEKRAFT_Y);
    tft.printf("%3.2f N",reading_bend);
   
-   tft.setCursor(140, 25);
+   tft.setCursor(POS_UPDATE_VALUES_X, POS_AXIALKRAFT_Y);
    tft.printf("%3.2f N",reading_ax);
 
-   tft.setCursor(140, 45);
+   tft.setCursor(POS_UPDATE_VALUES_X, 45);
    tft.printf("%d rpm",rpm_value);
 
-  tft.setCursor(140, 65);
+  tft.setCursor(POS_UPDATE_VALUES_X, POS_LASTZYKLEN_Y);
    tft.print(test);
 
    temp_bend =reading_bend;
