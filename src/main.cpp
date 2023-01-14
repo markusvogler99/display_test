@@ -1,7 +1,7 @@
 #include <Arduino.h>
-#include "SPI.h"
+#include <SPI.h>
 #include "HX711.h"
-#include "SD.h"
+#include <SD.h>
 #include "Force_Sensor.h"
 #include "Speed_Sensor.h"
 #include "string.h"
@@ -9,6 +9,10 @@
 #include "elapsedMillis.h"
 #include "Tachometer.h"
 #include "TouchScreen.h"
+
+
+File myFile;
+const int chipSelect = BUILTIN_SDCARD;
 
 
 // For the Adafruit shield, these are the default.
@@ -56,13 +60,18 @@ double rpm_value = 0;
 int load_cycles = 0;
 
 //Touch
-bool motor_continue= false;
-bool motor_stop= false;
+bool button= false;
+//bool motor_stop= false;
+int flag = 0; 
 
 //State Machine
+int test = 0; 
 int state = 0; 
 bool motor_aus = false; 
 bool motor_ein = false; 
+double start_load = 0; 
+String state_name; 
+int old_loadcycles = 0; 
 
 
 
@@ -75,8 +84,9 @@ TouchScreen ts = TouchScreen(YP, XP, YM, XM, 300);
 void setup() {
   Serial.begin(9600);
   
-   pinMode(SPEED_SENSOR, INPUT_PULLDOWN);
+   pinMode(SPEED_SENSOR, INPUT); 
    pinMode(MOTOR_AUS, OUTPUT);
+    pinMode(MOTOR_EIN, INPUT);
    
 
    bending_sensor.init(BEND_DOUT_PIN,BEND_SCK_PIN,GAIN);
@@ -92,8 +102,11 @@ void loop(void) {
 switch (state)
 {
   case 0:
+  state_name = "0 - IDLE";
   load_cycles = 0;
-  digitalWrite(MOTOR_AUS,LOW);
+  flag = 0; 
+  
+
  
   if (digitalRead(MOTOR_EIN) == HIGH)
   {
@@ -104,28 +117,56 @@ switch (state)
 
 
   case 1:
+  state_name = "1 - RUNNING";
+
+  Serial.print("Initializing SD card...");
+
+  // see if the card is present and can be initialized:
+  if (!SD.begin(chipSelect)) {
+    Serial.println("Card failed, or not present");
+    // don't do anything more:
+    while (1);
+  }
+  Serial.println("card initialized.");
 
 
+  if (flag == 0)
+  {
+  start_load = reading_bend; 
+  flag = 1; 
+  }
 
+  if (reading_bend < 0.5*start_load)
+  {
+    state = 2; 
+  }
+  else if (digitalRead(MOTOR_EIN) == LOW)
+   {
+    state = 3; 
+  }
   
   break; 
 
-
-
-
   case 2:
+  state_name = "2 - COMPLETE";
+  digitalWrite(MOTOR_AUS,HIGH);
+  if (button == true)
+   {
+    state = 0; 
+   }
   break; 
 
   case 3:
+  state_name = "3 - HOLDING";
+   if (digitalRead(MOTOR_EIN) == HIGH)
+   {
+    state = 1; 
+   }
+   else if (button == true) {
+    state = 0;
+    button = false;  
+   }
   break; 
-
-  
-
-  case 4:
-  break; 
-
-
-
 }
 
 
@@ -143,34 +184,43 @@ switch (state)
 
   load_cycles = speed_sensor.get_load_cycles(); 
   rpm_value = speed_sensor.get_rpm_value();
-
-
-
-
-  //Serial.println(rpm_value);
+ 
+ 
+  
 
   TSPoint p = ts.getPoint();
   
   // we have some minimum pressure we consider 'valid'
   // pressure of 0 means no pressing!
-  if (p.z > ts.pressureThreshhold and p.x < 325 and p.y > 760) {
-    motor_continue = true;
-     Serial.print("\tWeiter = "); Serial.println(motor_continue);}
-  else if (p.z > ts.pressureThreshhold and p.x > 677 and p.y > 760) {
-    motor_stop = true;
-     Serial.print("\tStop = "); Serial.println(motor_stop);
-  }
-  else {
-  motor_continue = false;
-  motor_stop = false; 
-  }
-
-  delay(100);
-
   
+  if (p.z > ts.pressureThreshhold and p.x < 500 and p.y > 760) {
+   button = true;
+     //Serial.print("\tButton = "); Serial.println(button);
+}
+else
+{
+  button = false;
+  //Serial.print("\tButton = "); 
+  //Serial.println(state_name);
+  }
+
+  if (load_cycles != old_loadcycles){
+  
+  
+  Serial.printf("%d",load_cycles); 
+  Serial.printf(", %f",reading_bend);
+  Serial.printf(", %f \n",reading_ax);
+  
+  
+  //myFile.printf("%d",global_time);
+ //myFile.printf(", 100");
+  //myFile.printf(", 200");
+  //myFile.printf(", %d \n",counter);
+  old_loadcycles = load_cycles; 
+  }
 
  //Display.draw_tacho(rpm_value);
 
- Display.draw_display(reading_bend, reading_ax,rpm_value,load_cycles);
+ Display.draw_display(reading_bend, reading_ax,rpm_value,load_cycles,state_name);
  
 }
